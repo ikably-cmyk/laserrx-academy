@@ -200,8 +200,12 @@ function render(){
 
   var videoHTML;
   if (lesson.video){
-    videoHTML = '<div class="video-box"><iframe src="'+esc(lesson.video)+
-      '" allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>';
+    if (/\.(mp4|webm|mov)(\?|$)/i.test(lesson.video)){
+      videoHTML = '<div class="video-box"><video src="'+esc(lesson.video)+'" controls preload="metadata" playsinline'+(lesson.poster?(' poster="'+esc(lesson.poster)+'"'):'')+'></video></div>';
+    } else {
+      videoHTML = '<div class="video-box"><iframe src="'+esc(lesson.video)+
+        '" allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>';
+    }
   } else {
     videoHTML = '<div class="video-box"><div class="play"></div>'+
       '<div class="vlabel">VIDEO · COMING SOON</div></div>';
