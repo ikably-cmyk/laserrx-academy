@@ -1,0 +1,166 @@
+{
+  "name": "LaserRx — Academy Progress",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "laserrx-academy-progress",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "node-webhook-01",
+      "name": "01 · Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300],
+      "webhookId": "laserrx-academy-progress"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $input.first().json.body || {};\nconst email = String(b.email || '').trim().toLowerCase();\nconst lesson_id = String(b.lesson_id || '');\nconst track = String(b.track || '');\nconst event = String(b.event || 'start');\nconst time_spent_seconds = Number(b.time_spent_seconds || 0);\nconst lesson_version = String(b.lesson_version || 'v1');\nconst now = new Date().toISOString();\nconst progress_key = email + '|' + lesson_id;\nconst status = event === 'complete' ? 'completed' : 'in_progress';\nreturn [{ json: { email, lesson_id, track, event, time_spent_seconds, lesson_version, now, progress_key, status } }];"
+      },
+      "id": "node-code-02",
+      "name": "02 · Parse + key",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-complete",
+              "leftValue": "={{ $json.event }}",
+              "rightValue": "complete",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-if-03",
+      "name": "03 · ¿Complete?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1EouK0kzudACBc83Tk_bQEm9K-ZrKZRzAVbV97AFa2vg",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "User_Progress",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "progress_key": "={{ $json.progress_key }}",
+            "email": "={{ $json.email }}",
+            "lesson_id": "={{ $json.lesson_id }}",
+            "track": "={{ $json.track }}",
+            "status": "={{ $json.status }}",
+            "completed_at": "={{ $json.now }}",
+            "time_spent_seconds": "={{ $json.time_spent_seconds }}",
+            "lesson_version": "={{ $json.lesson_version }}"
+          },
+          "matchingColumns": ["progress_key"]
+        },
+        "options": {}
+      },
+      "id": "node-sheets-complete-04",
+      "name": "04 · Sheets · complete",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1EouK0kzudACBc83Tk_bQEm9K-ZrKZRzAVbV97AFa2vg",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "User_Progress",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "progress_key": "={{ $json.progress_key }}",
+            "email": "={{ $json.email }}",
+            "lesson_id": "={{ $json.lesson_id }}",
+            "track": "={{ $json.track }}",
+            "status": "={{ $json.status }}",
+            "started_at": "={{ $json.now }}",
+            "lesson_version": "={{ $json.lesson_version }}"
+          },
+          "matchingColumns": ["progress_key"]
+        },
+        "options": {}
+      },
+      "id": "node-sheets-start-05",
+      "name": "05 · Sheets · start",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"ok\": true, \"event\": $json.event, \"key\": $json.progress_key } }}",
+        "options": {}
+      },
+      "id": "node-respond-06",
+      "name": "06 · Responder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1140, 300]
+    }
+  ],
+  "connections": {
+    "01 · Webhook": {
+      "main": [[{ "node": "02 · Parse + key", "type": "main", "index": 0 }]]
+    },
+    "02 · Parse + key": {
+      "main": [[{ "node": "03 · ¿Complete?", "type": "main", "index": 0 }]]
+    },
+    "03 · ¿Complete?": {
+      "main": [
+        [{ "node": "04 · Sheets · complete", "type": "main", "index": 0 }],
+        [{ "node": "05 · Sheets · start", "type": "main", "index": 0 }]
+      ]
+    },
+    "04 · Sheets · complete": {
+      "main": [[{ "node": "06 · Responder", "type": "main", "index": 0 }]]
+    },
+    "05 · Sheets · start": {
+      "main": [[{ "node": "06 · Responder", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false,
+  "pinData": {}
+}

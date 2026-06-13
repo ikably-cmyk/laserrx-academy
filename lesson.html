@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>LaserRx Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Light Steel — production palette */
+    --bg:        #F4F5F2;
+    --card:      #FFFFFF;
+    --navy:      #1B263B;
+    --berkeley:  #0D1B2A;
+    --yale:      #415A77;
+    --steel:     #778DA9;
+    --platinum:  #E0E1DD;
+    --amber:     #E0A458;
+    --hot:       #E07A5F;
+    --hair-d:    rgba(27,38,59,0.12);
+    --good:      #3B6D11;
+    --good-bg:   #EAF3DE;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:var(--bg);}
+  body{
+    font-family:'Instrument Sans',system-ui,sans-serif;
+    color:var(--navy);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.55;
+    padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
+  }
+  .mono{font-family:'Space Mono',monospace;}
+  .wrap{max-width:780px;margin:0 auto;padding:0 18px;}
+
+  /* ---------- header ---------- */
+  header{
+    background:var(--navy);
+    color:var(--platinum);
+    padding:18px 0 16px;
+    position:sticky;top:0;z-index:40;
+    box-shadow:0 4px 18px rgba(13,27,42,0.18);
+  }
+  .brand{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.34em;
+    color:var(--steel);font-weight:700;}
+  .htitle{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:4px;}
+  .htitle h1{font-size:22px;font-weight:700;letter-spacing:-0.01em;color:#fff;}
+  .htitle .sub{font-size:13px;color:var(--steel);}
+  .track-row{display:flex;align-items:center;gap:10px;margin-top:12px;}
+  .track-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.14em;
+    color:var(--steel);white-space:nowrap;text-transform:uppercase;}
+  .track-bar{flex:1;height:5px;background:rgba(224,225,221,0.18);border-radius:3px;overflow:hidden;}
+  .track-fill{height:100%;background:var(--amber);border-radius:3px;transition:width .5s ease;}
+  .track-count{font-family:'Space Mono',monospace;font-size:10px;color:var(--steel);white-space:nowrap;}
+
+  /* ---------- section heads ---------- */
+  .eyebrow{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.2em;
+    text-transform:uppercase;color:var(--steel);margin:26px 0 10px;}
+
+  /* ---------- cards ---------- */
+  .cards{display:flex;flex-direction:column;gap:14px;}
+  .card{
+    background:var(--card);border:1px solid var(--hair-d);border-radius:14px;
+    padding:18px 18px 8px;box-shadow:0 6px 20px rgba(27,38,59,0.05);
+    opacity:0;transform:translateY(10px);
+    animation:rise .5s ease forwards;
+  }
+  .card:nth-child(1){animation-delay:.05s}.card:nth-child(2){animation-delay:.12s}
+  .card:nth-child(3){animation-delay:.19s}.card:nth-child(4){animation-delay:.26s}
+  .card:nth-child(5){animation-delay:.33s}.card:nth-child(6){animation-delay:.40s}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .card h3{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+  .card p{font-size:14.5px;color:#34404f;}
+  .card .fig{margin:12px -4px 6px;display:flex;justify-content:center;}
+  .card .fig svg{width:100%;max-width:340px;height:auto;}
+  .svg-cap{font-family:'Space Mono',monospace;font-size:9px;}
+  .svg-lbl{font-family:'Instrument Sans',sans-serif;font-size:11px;font-weight:600;}
+  .svg-formula{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;}
+  .svg-w{font-family:'Space Mono',monospace;font-size:9px;font-weight:700;fill:var(--steel);}
+  .svg-us{font-family:'Space Mono',monospace;font-size:10px;fill:var(--steel);}
+
+  /* ---------- video ---------- */
+  .video-box{
+    position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;
+    background:linear-gradient(135deg,#0D1B2A,#1B263B);
+    border:1px solid var(--hair-d);display:flex;align-items:center;justify-content:center;
+    flex-direction:column;gap:10px;color:var(--steel);
+  }
+  .video-box iframe,.video-box video{position:absolute;inset:0;width:100%;height:100%;border:0;}
+  .play{width:54px;height:54px;border-radius:50%;border:2px solid var(--steel);
+    display:flex;align-items:center;justify-content:center;}
+  .play::after{content:'';border-left:16px solid var(--steel);border-top:10px solid transparent;
+    border-bottom:10px solid transparent;margin-left:4px;}
+  .video-box .vlabel{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.12em;}
+
+  /* ---------- artifact stage ---------- */
+  .stage-shell{
+    background:var(--berkeley);border-radius:16px;padding:8px;border:1px solid var(--hair-d);
+    box-shadow:0 14px 36px rgba(13,27,42,0.22);
+  }
+  .stage-frame{position:relative;width:100%;aspect-ratio:16/10;border-radius:11px;overflow:hidden;background:#0D1B2A;}
+  @media(max-width:560px){.stage-frame{aspect-ratio:3/4;}}
+  .stage-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+  .nudge{
+    text-align:center;font-family:'Space Mono',monospace;font-size:11px;color:var(--amber);
+    padding:10px 0 2px;letter-spacing:0.04em;transition:opacity .4s;
+  }
+  .nudge.done{color:var(--good);}
+
+  /* ---------- footer / actions ---------- */
+  .actions{display:flex;flex-direction:column;gap:14px;margin-top:24px;}
+  .complete-btn{
+    width:100%;border:none;border-radius:12px;padding:15px;
+    font-family:'Instrument Sans',sans-serif;font-size:15px;font-weight:700;
+    background:var(--steel);color:#fff;cursor:not-allowed;opacity:.55;
+    transition:all .25s;letter-spacing:0.01em;
+  }
+  .complete-btn.ready{background:var(--amber);color:var(--navy);cursor:pointer;opacity:1;
+    box-shadow:0 6px 18px rgba(224,164,88,0.35);}
+  .complete-btn.ready:hover{transform:translateY(-1px);}
+  .complete-btn.done{background:var(--good-bg);color:var(--good);cursor:default;
+    box-shadow:none;border:1px solid rgba(59,109,17,0.3);}
+  .nav{display:flex;gap:10px;}
+  .nav a{
+    flex:1;text-align:center;text-decoration:none;border-radius:10px;padding:12px;
+    font-size:13px;font-weight:600;border:1px solid var(--hair-d);color:var(--yale);
+    background:var(--card);transition:all .2s;
+  }
+  .nav a:hover{border-color:var(--steel);color:var(--navy);}
+  .nav a.disabled{opacity:.4;pointer-events:none;}
+  .nav a.next.hot{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .nav a .dir{display:block;font-family:'Space Mono',monospace;font-size:9px;
+    letter-spacing:0.14em;color:var(--steel);text-transform:uppercase;margin-bottom:2px;}
+  .nav a.next.hot .dir{color:var(--steel);}
+  .foot{text-align:center;font-family:'Space Mono',monospace;font-size:10px;
+    color:var(--steel);letter-spacing:0.1em;margin:26px 0 6px;}
+
+  /* ---------- lock / error ---------- */
+  .gate{max-width:520px;margin:60px auto;text-align:center;padding:0 22px;}
+  .gate .lock{font-size:34px;}
+  .gate h2{font-size:20px;margin:14px 0 8px;color:var(--navy);}
+  .gate p{color:var(--yale);font-size:14px;}
+  .gate a{display:inline-block;margin-top:18px;background:var(--amber);color:var(--navy);
+    text-decoration:none;font-weight:700;padding:12px 22px;border-radius:11px;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="lessons.js"></script>
+<script>
+'use strict';
+
+/* ======================= CONFIG ======================= */
+var TRACK_WEBHOOK = 'https://laserai.app.n8n.cloud/webhook/laserrx-academy-progress';
+var LESSON_VERSION = 'v1';
+var TIER_RANK = { free:0, pro:1, elite:2 };
+
+/* ======================= PARAMS ======================= */
+var qs    = new URLSearchParams(location.search);
+var id    = qs.get('lesson') || 'the_rope';
+var email = (qs.get('email') || '').trim();
+var plan  = (qs.get('plan')  || 'free').trim().toLowerCase();
+var lesson = (window.LESSONS || {})[id];
+
+var startTime = Date.now();
+var interacted = false;
+var completed  = false;
+
+/* ======================= GUARDS ======================= */
+function gate(html){ document.getElementById('root').innerHTML = '<div class="gate">'+html+'</div>'; }
+
+if (!lesson){
+  gate('<div class="lock">🔍</div><h2>Lesson not found</h2><p>This lesson isn\'t available yet.</p>');
+} else if ((TIER_RANK[plan] ?? 0) < (TIER_RANK[lesson.tier] ?? 0)){
+  gate('<div class="lock">🔒</div><h2>'+esc(lesson.title)+'</h2>'+
+       '<p>This lesson is part of the '+cap(lesson.tier)+' plan. Upgrade to unlock the full '+
+       esc(lesson.trackLabel)+' track.</p>'+
+       '<a href="https://app.laserapp.ai">View plans</a>');
+} else {
+  render();
+}
+
+/* ======================= RENDER ======================= */
+function render(){
+  var pct = Math.round((lesson.index / lesson.trackTotal) * 100);
+
+  var cardsHTML = (lesson.cards || []).map(function(c){
+    return '<div class="card"><h3>'+c.title+'</h3>'+
+           (c.fig===false?'':'<div class="fig">'+(c.svg||'')+'</div>')+
+           '<p>'+c.body+'</p></div>';
+  }).join('');
+
+  var videoHTML;
+  if (lesson.video){
+    videoHTML = '<div class="video-box"><iframe src="'+esc(lesson.video)+
+      '" allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>';
+  } else {
+    videoHTML = '<div class="video-box"><div class="play"></div>'+
+      '<div class="vlabel">VIDEO · COMING SOON</div></div>';
+  }
+
+  var stageHTML = lesson.artifact
+    ? '<div class="stage-shell"><div class="stage-frame">'+
+        '<iframe id="artifactFrame" src="'+esc(lesson.artifact)+'" title="'+esc(lesson.title)+' interactive"></iframe>'+
+      '</div></div>'+
+      '<div class="nudge" id="nudge">↑ Move the slider to continue</div>'
+    : (lesson.download
+        ? '<div class="stage-shell" style="padding:22px;text-align:center">'+
+            '<a href="'+esc(lesson.download)+'" download style="color:var(--amber);font-weight:700;text-decoration:none">⬇ Download deck</a></div>'
+        : '');
+
+  // nav
+  var prevHTML = lesson.prev
+    ? '<a class="prev" href="'+navUrl(lesson.prev)+'"><span class="dir">← Prev</span>'+lessonTitle(lesson.prev)+'</a>'
+    : '<a class="prev disabled"><span class="dir">← Prev</span>Start of track</a>';
+  var nextHTML = lesson.next
+    ? '<a class="next" id="nextLink" href="'+navUrl(lesson.next)+'"><span class="dir">Next →</span>'+lessonTitle(lesson.next)+'</a>'
+    : '<a class="next disabled"><span class="dir">Next →</span>End of track</a>';
+
+  document.getElementById('root').innerHTML =
+    '<header><div class="wrap">'+
+      '<div class="brand">L A S E R R X · A C A D E M Y</div>'+
+      '<div class="htitle"><h1>'+esc(lesson.title)+'</h1><span class="sub">'+lesson.subtitle+'</span></div>'+
+      '<div class="track-row">'+
+        '<span class="track-label">'+esc(lesson.trackLabel)+'</span>'+
+        '<div class="track-bar"><div class="track-fill" style="width:'+pct+'%"></div></div>'+
+        '<span class="track-count">'+lesson.index+' / '+lesson.trackTotal+'</span>'+
+      '</div>'+
+    '</div></header>'+
+    '<main class="wrap">'+
+      (cardsHTML ? '<div class="eyebrow">What you\'ll learn</div><div class="cards">'+cardsHTML+'</div>' : '')+
+      '<div class="eyebrow">Watch</div>'+videoHTML+
+      (stageHTML ? '<div class="eyebrow">Try it</div>'+stageHTML : '')+
+      '<div class="actions">'+
+        '<button class="complete-btn" id="completeBtn">Mark as complete</button>'+
+        '<div class="nav">'+prevHTML+nextHTML+'</div>'+
+      '</div>'+
+      '<div class="foot">LaserRx · for licensed dental professionals</div>'+
+    '</main>';
+
+  wireUp();
+  track('start', 0);
+}
+
+/* ======================= INTERACTION GATE ======================= */
+function wireUp(){
+  var btn = document.getElementById('completeBtn');
+  btn.addEventListener('click', onComplete);
+
+  // No artifact, or no interaction gate → allow completing right away.
+  if (!lesson.artifact || !lesson.interaction){ unlock(); return; }
+
+  var frame = document.getElementById('artifactFrame');
+  frame.addEventListener('load', function(){
+    try{
+      var doc = frame.contentDocument || frame.contentWindow.document; // same-origin on GitHub Pages
+      var el  = doc.querySelector(lesson.interaction.selector);
+      if (el){
+        el.addEventListener(lesson.interaction.event || 'input', onInteract);
+      } else {
+        dwellFallback();
+      }
+    }catch(e){
+      // cross-origin or blocked → fall back to a dwell timer
+      dwellFallback();
+    }
+  });
+  // safety net: if the frame never fires load, unlock after a while
+  setTimeout(function(){ if(!interacted) dwellFallback(); }, 25000);
+}
+
+function onInteract(){
+  if (interacted) return;
+  interacted = true;
+  unlock();
+  var n = document.getElementById('nudge');
+  if (n){ n.textContent = '✓ Nice — you can mark this complete'; n.classList.add('done'); }
+}
+
+function dwellFallback(){ setTimeout(unlock, 12000); }
+
+function unlock(){
+  var btn = document.getElementById('completeBtn');
+  if (btn && !completed) btn.classList.add('ready');
+}
+
+/* ======================= COMPLETE ======================= */
+function onComplete(){
+  var btn = document.getElementById('completeBtn');
+  if (!btn.classList.contains('ready') || completed) return;
+  completed = true;
+  var secs = Math.round((Date.now() - startTime) / 1000);
+  track('complete', secs);
+
+  btn.classList.remove('ready');
+  btn.classList.add('done');
+  btn.textContent = '✓ Completed';
+
+  var nx = document.getElementById('nextLink');
+  if (nx) nx.classList.add('hot');
+  var n = document.getElementById('nudge');
+  if (n){ n.textContent = '✓ Lesson complete'; n.classList.add('done'); }
+}
+
+/* ======================= TRACKING (non-blocking) ======================= */
+function track(event, secs){
+  if (!email) return; // anonymous / public preview → no tracking
+  var payload = {
+    email: email,
+    lesson_id: lesson.id,
+    track: lesson.track,
+    event: event,
+    time_spent_seconds: secs || 0,
+    lesson_version: LESSON_VERSION
+  };
+  try{
+    fetch(TRACK_WEBHOOK, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
+      keepalive: true
+    }).catch(function(){});
+  }catch(e){}
+}
+
+/* ======================= HELPERS ======================= */
+function navUrl(targetId){
+  var u = new URLSearchParams();
+  u.set('lesson', targetId);
+  if (email) u.set('email', email);
+  if (plan)  u.set('plan', plan);
+  return 'lesson.html?' + u.toString();
+}
+function lessonTitle(tid){ var l=(window.LESSONS||{})[tid]; return l?esc(l.title):'—'; }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function cap(s){ return String(s).charAt(0).toUpperCase()+String(s).slice(1); }
+</script>
+</body>
+</html>
