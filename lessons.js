@@ -38,7 +38,7 @@ window.LESSONS = {
     subtitle: 'Pulse width &amp; peak power — same energy, different bend',
     artifact: 'artifacts/the_rope.html',
     interaction: { selector: '#pwSlider', event: 'input' },
-    video: 'the_rope.mp4',
+    video: 'https://www.youtube-nocookie.com/embed/QgcJWTt-_4w?rel=0&modestbranding=1',
     prev: null,
     next: 'hertz_bouncing_ball',
     cards: [
