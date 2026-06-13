@@ -45,6 +45,11 @@
   }
   .brand{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.34em;
     color:var(--steel);font-weight:700;}
+  .brand-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .back-link{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.14em;
+    color:var(--steel);text-decoration:none;border:1px solid rgba(224,225,221,0.25);
+    padding:4px 10px;border-radius:7px;white-space:nowrap;transition:all .2s;}
+  .back-link:hover{color:#fff;border-color:var(--steel);}
   .htitle{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:4px;}
   .htitle h1{font-size:22px;font-weight:700;letter-spacing:-0.01em;color:#fff;}
   .htitle .sub{font-size:13px;color:var(--steel);}
@@ -220,9 +225,12 @@ function render(){
     ? '<a class="next" id="nextLink" href="'+navUrl(lesson.next)+'"><span class="dir">Next →</span>'+lessonTitle(lesson.next)+'</a>'
     : '<a class="next disabled"><span class="dir">Next →</span>End of track</a>';
 
+  var backUrl = 'https://ikably-cmyk.github.io/laserrx-chat/' + (email ? ('?email=' + encodeURIComponent(email)) : '');
+
   document.getElementById('root').innerHTML =
     '<header><div class="wrap">'+
-      '<div class="brand">L A S E R R X · A C A D E M Y</div>'+
+      '<div class="brand-row"><div class="brand">L A S E R R X · A C A D E M Y</div>'+
+      '<a class="back-link" href="'+esc(backUrl)+'">← LaserRx</a></div>'+
       '<div class="htitle"><h1>'+esc(lesson.title)+'</h1><span class="sub">'+lesson.subtitle+'</span></div>'+
       '<div class="track-row">'+
         '<span class="track-label">'+esc(lesson.trackLabel)+'</span>'+
