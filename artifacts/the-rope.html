@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Rope · LaserRx</title>
+<style>
+  :root {
+    --berkeley: #0D1B2A;
+    --oxford:   #1B263B;
+    --yale:     #415A77;
+    --steel:    #778DA9;
+    --platinum: #E0E1DD;
+    --amber:    #E0A458;
+    --hot:      #E07A5F;
+    --bad:      #C95A40;
+    --muted:    rgba(224, 225, 221, 0.55);
+    --hair:     rgba(224, 225, 221, 0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; width: 100%; }
+  body {
+    background:
+      radial-gradient(ellipse at top, rgba(65, 90, 119, 0.4) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom, rgba(13, 27, 42, 0.5) 0%, transparent 60%),
+      var(--oxford);
+    color: var(--platinum);
+    font-family: 'Inter', 'Calibri', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 3vh 2vw;
+  }
+
+  .brand {
+    font-size: 0.7vw;
+    letter-spacing: 0.4em;
+    color: var(--steel);
+    font-weight: 700;
+    margin-bottom: 0.8vh;
+  }
+  h1 {
+    font-size: 2.4vw;
+    font-weight: 700;
+    color: var(--platinum);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  h1 .accent {
+    color: var(--amber);
+    font-style: italic;
+    font-weight: 600;
+  }
+  .subtitle {
+    font-size: 0.85vw;
+    color: var(--muted);
+    margin-top: 0.8vh;
+    margin-bottom: 3vh;
+    letter-spacing: 0.04em;
+  }
+
+  .stage {
+    width: 80vw;
+    max-width: 1200px;
+    height: 42vh;
+    background: rgba(13, 27, 42, 0.45);
+    border: 1px solid var(--hair);
+    border-radius: 14px;
+    margin-bottom: 2.5vh;
+    overflow: hidden;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+  }
+  svg { display: block; width: 100%; height: 100%; }
+
+  .stats {
+    display: flex;
+    gap: 4vw;
+    margin-bottom: 2vh;
+  }
+  .stat { text-align: center; }
+  .stat-label {
+    font-size: 0.7vw;
+    color: var(--steel);
+    letter-spacing: 0.22em;
+    font-weight: 700;
+    margin-bottom: 0.3vh;
+  }
+  .stat-big {
+    font-size: 2.0vw;
+    font-weight: 700;
+    color: var(--amber);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .stat-big .unit {
+    font-size: 0.55em;
+    color: var(--steel);
+    margin-left: 0.25em;
+    font-weight: 600;
+  }
+  .stat-sub {
+    font-size: 0.68vw;
+    color: var(--muted);
+    margin-top: 0.4vh;
+    letter-spacing: 0.05em;
+  }
+  .stat.peak .stat-big { color: var(--hot); }
+  .stat.peak .stat-big.flash {
+    animation: flash 0.4s ease-out;
+  }
+  @keyframes flash {
+    0% { color: #FFE08A; text-shadow: 0 0 20px var(--hot); }
+    100% { color: var(--hot); text-shadow: none; }
+  }
+
+  .controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2vh;
+    width: 70vw;
+    max-width: 800px;
+  }
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 1.5vw;
+    width: 100%;
+  }
+  .slider-end {
+    font-size: 0.7vw;
+    color: var(--steel);
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    min-width: 50px;
+    text-align: center;
+  }
+  input[type=range] {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: rgba(224, 225, 221, 0.15);
+    border-radius: 4px;
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px; height: 22px;
+    background: var(--amber);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 0 5px rgba(224, 164, 88, 0.22);
+    transition: transform 0.15s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  input[type=range]::-moz-range-thumb {
+    width: 22px; height: 22px;
+    background: var(--amber);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .preset-row {
+    display: flex;
+    gap: 0.8vw;
+  }
+  .preset {
+    background: transparent;
+    border: 2px solid var(--steel);
+    color: var(--steel);
+    padding: 0.7vh 1.2vw;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.72vw;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    cursor: pointer;
+    transition: all 0.18s;
+    opacity: 0.7;
+  }
+  .preset:hover { opacity: 1; color: var(--platinum); border-color: var(--platinum); }
+  .preset.active {
+    background: var(--amber);
+    color: var(--oxford);
+    border-color: var(--amber);
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="brand">L A S E R R X  ·  THE ROPE</div>
+<h1>Same energy. <span class="accent">Different bend.</span></h1>
+<div class="subtitle">Compress the pulse → the peak shoots up. Stretch it → the peak flattens out.</div>
+
+<div class="stage">
+  <svg viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <linearGradient id="ropeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#FFD86B"/>
+        <stop offset="50%" stop-color="#E0A458"/>
+        <stop offset="100%" stop-color="#8C5C2E"/>
+      </linearGradient>
+      <linearGradient id="ropeGradHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="rgba(255, 255, 255, 0.85)"/>
+        <stop offset="100%" stop-color="rgba(255, 255, 255, 0.0)"/>
+      </linearGradient>
+      <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="8"/>
+      </filter>
+    </defs>
+
+    <!-- Ground baseline (dashed reference line) -->
+    <line x1="40" y1="500" x2="1160" y2="500"
+          stroke="rgba(119, 141, 169, 0.28)" stroke-width="1" stroke-dasharray="4 6"/>
+
+    <!-- Glow under the rope (gives drama on tall peaks) -->
+    <path id="ropeGlow" fill="none" stroke="#E0A458" stroke-width="22"
+          stroke-linecap="round" opacity="0.32" filter="url(#glow)"/>
+
+    <!-- THE ROPE -->
+    <path id="rope" fill="none" stroke="url(#ropeGrad)" stroke-width="14"
+          stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Top highlight on rope (subtle white line for the "cord" feel) -->
+    <path id="ropeHighlight" fill="none" stroke="url(#ropeGradHighlight)" stroke-width="3"
+          stroke-linecap="round" opacity="0.55"/>
+
+    <!-- Peak marker dot -->
+    <circle id="peakDot" cx="600" cy="500" r="8"
+            fill="#E07A5F" stroke="white" stroke-width="2.5"/>
+    <text id="peakLabel" x="600" y="500" text-anchor="middle"
+          fill="#E07A5F" font-size="18" font-weight="800"
+          font-family="Inter, sans-serif" letter-spacing="2">PEAK</text>
+
+    <!-- Tick marks on baseline -->
+    <g opacity="0.4">
+      <line x1="600" y1="498" x2="600" y2="508" stroke="var(--steel)" stroke-width="1.5"/>
+    </g>
+  </svg>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-label">PULSE WIDTH</div>
+    <div class="stat-big"><span id="pwDisp">200</span><span class="unit">μs</span></div>
+    <div class="stat-sub">the width of the rope</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">ENERGY · CONSTANT</div>
+    <div class="stat-big">200<span class="unit">mJ</span></div>
+    <div class="stat-sub">area under the rope</div>
+  </div>
+  <div class="stat peak">
+    <div class="stat-label">PEAK POWER</div>
+    <div class="stat-big"><span id="peakDisp">1,000</span><span class="unit">W</span></div>
+    <div class="stat-sub"><span id="peakKwDisp">= 1.00 kW</span></div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="slider-row">
+    <span class="slider-end">60 μs</span>
+    <input type="range" id="pwSlider" min="60" max="700" step="5" value="200">
+    <span class="slider-end">700 μs</span>
+  </div>
+  <div class="preset-row">
+    <button class="preset" data-pw="60">H  ·  60 μs</button>
+    <button class="preset active" data-pw="200">200 μs</button>
+    <button class="preset" data-pw="700">S  ·  700 μs</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// =========================================================================
+// Constants — chosen so the visual matches the physics
+// Energy (constant) = 200 mJ → area under the rope stays the same
+// Peak power = Energy(mJ) × 1000 / pulseWidth(μs)  in Watts
+// =========================================================================
+const ENERGY_MJ   = 200;
+const BASELINE_Y  = 500;
+const CENTER_X    = 600;
+const SCALE_W     = 1.4;     // pixels per μs (bump width)
+const SCALE_H     = 0.118;   // pixels per W  (bump height)
+const MIN_BUMP_W  = 40;      // never thinner than this (so the rope still "exists")
+
+const $ = id => document.getElementById(id);
+const slider         = $('pwSlider');
+const ropePath       = $('rope');
+const ropeGlow       = $('ropeGlow');
+const ropeHighlight  = $('ropeHighlight');
+const peakDot        = $('peakDot');
+const peakLabel      = $('peakLabel');
+const pwDisp         = $('pwDisp');
+const peakDisp       = $('peakDisp');
+const peakKwDisp     = $('peakKwDisp');
+const peakStatBig    = document.querySelector('.stat.peak .stat-big');
+
+let lastPeakW = 0;
+
+function update() {
+  const pw    = parseInt(slider.value, 10);
+  const peakW = (ENERGY_MJ * 1000) / pw;
+
+  // Geometry — same area always (constant energy)
+  const bumpW   = Math.max(MIN_BUMP_W, pw * SCALE_W);
+  const peakH   = peakW * SCALE_H;
+  const startX  = CENTER_X - bumpW / 2;
+  const endX    = CENTER_X + bumpW / 2;
+  const peakY   = BASELINE_Y - peakH;
+  // Quadratic Bézier control so the curve TRULY reaches peakY at the apex
+  const ctrlY   = 2 * peakY - BASELINE_Y;
+
+  const d = `M 40 ${BASELINE_Y}
+             L ${startX.toFixed(1)} ${BASELINE_Y}
+             Q ${CENTER_X} ${ctrlY.toFixed(1)}, ${endX.toFixed(1)} ${BASELINE_Y}
+             L 1160 ${BASELINE_Y}`;
+
+  ropePath.setAttribute('d', d);
+  ropeGlow.setAttribute('d', d);
+  ropeHighlight.setAttribute('d', d);
+
+  // Peak dot + label
+  peakDot.setAttribute('cx', CENTER_X);
+  peakDot.setAttribute('cy', peakY);
+  peakLabel.setAttribute('x', CENTER_X);
+  peakLabel.setAttribute('y', peakY - 18);
+
+  // Displays
+  pwDisp.textContent       = pw;
+  peakDisp.textContent     = Math.round(peakW).toLocaleString();
+  peakKwDisp.textContent   = `= ${(peakW / 1000).toFixed(2)} kW`;
+
+  // Flash when peak power changes a lot
+  if (lastPeakW > 0 && Math.abs(peakW / lastPeakW - 1) > 0.15) {
+    peakStatBig.classList.remove('flash');
+    void peakStatBig.offsetWidth;
+    peakStatBig.classList.add('flash');
+  }
+  lastPeakW = peakW;
+
+  // Update preset active state
+  document.querySelectorAll('.preset').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.pw, 10) === pw);
+  });
+}
+
+slider.addEventListener('input', update);
+
+// Preset buttons — animate smoothly to the target
+let animTarget = null;
+function animateTo(targetPw) {
+  animTarget = targetPw;
+  const step = () => {
+    if (animTarget === null) return;
+    const current = parseInt(slider.value, 10);
+    const diff = animTarget - current;
+    if (Math.abs(diff) <= 5) {
+      slider.value = animTarget;
+      animTarget = null;
+    } else {
+      slider.value = current + diff * 0.22;
+    }
+    update();
+    if (animTarget !== null) requestAnimationFrame(step);
+  };
+  step();
+}
+document.querySelectorAll('.preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    animateTo(parseInt(btn.dataset.pw, 10));
+  });
+});
+
+// Keyboard arrows nudge the slider
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  let pw = parseInt(slider.value, 10);
+  if (e.key === 'ArrowLeft')  { pw = Math.max(60,  pw - 20); slider.value = pw; update(); }
+  if (e.key === 'ArrowRight') { pw = Math.min(700, pw + 20); slider.value = pw; update(); }
+});
+
+// Initial render
+update();
+</script>
+</body>
+</html>
