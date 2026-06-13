@@ -324,14 +324,22 @@ function track(event, secs){
     time_spent_seconds: secs || 0,
     lesson_version: LESSON_VERSION
   };
-  try{
-    fetch(TRACK_WEBHOOK, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(payload),
-      keepalive: true
-    }).catch(function(){});
-  }catch(e){}
+  function send(attempt){
+    try{
+      fetch(TRACK_WEBHOOK, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload),
+        keepalive: true
+      }).then(function(r){
+        // n8n Cloud can return 503 on a cold start — retry a couple of times
+        if(!r.ok && attempt < 2){ setTimeout(function(){ send(attempt+1); }, 2000); }
+      }).catch(function(){
+        if(attempt < 2){ setTimeout(function(){ send(attempt+1); }, 2000); }
+      });
+    }catch(e){}
+  }
+  send(0);
 }
 
 /* ======================= HELPERS ======================= */
