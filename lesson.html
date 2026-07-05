@@ -159,9 +159,9 @@
 'use strict';
 
 /* ======================= CONFIG ======================= */
-var TRACK_WEBHOOK = 'https://laserai.app.n8n.cloud/webhook/laserrx-academy-progress';
+var TRACK_WEBHOOK   = 'https://laserai.app.n8n.cloud/webhook/laserrx-academy-progress';
+var CONTENT_WEBHOOK = 'https://laserai.app.n8n.cloud/webhook/laserrx-academy-content';
 var LESSON_VERSION = 'v1';
-var TIER_RANK = { free:0, pro:1, elite:2 };
 
 /* ======================= PARAMS ======================= */
 var qs    = new URLSearchParams(location.search);
@@ -177,15 +177,63 @@ var completed  = false;
 /* ======================= GUARDS ======================= */
 function gate(html){ document.getElementById('root').innerHTML = '<div class="gate">'+html+'</div>'; }
 
+function lockGate(){
+  // Academy is a STANDALONE product with its own monthly subscription (academy_access),
+  // independent from the consult plan/credits. The lock copy must NOT mention Elite/Pro/
+  // any consult plan. CTA is a placeholder for now — the Academy Stripe checkout is wired
+  // in a later phase (no purchase link yet). This file has no i18n; copy is EN only.
+  gate('<div class="lock">🔒</div>'+
+       '<h2>This is a LaserRx Academy lesson</h2>'+
+       '<p>Academy is a separate learning module with its own monthly subscription — '+
+       'independent from your LaserRx plan and credits. Subscribe to unlock every Academy lesson.</p>'+
+       '<a aria-disabled="true" style="cursor:default;opacity:.55">Get Academy access</a>');
+       // TODO(next phase): point CTA at the Academy Stripe checkout once the product exists.
+}
+function loadingGate(){
+  gate('<div class="lock">⏳</div><h2>Loading…</h2><p>Checking your access and preparing this lesson.</p>');
+}
+function errorGate(){
+  var back = 'https://ikably-cmyk.github.io/laserrx-chat/' + (email ? ('?email=' + encodeURIComponent(email)) : '');
+  gate('<div class="lock">⚠️</div><h2>Couldn\'t load this lesson</h2>'+
+       '<p>Something went wrong reaching the server. Please refresh to try again.</p>'+
+       '<a href="'+esc(back)+'">← Back to LaserRx</a>');
+}
+
+/* Blindaje B — gated lessons (tier !== 'free') fetch their content from the n8n
+   endpoint, which verifies academy access server-side and returns a Bunny video.
+   Free lessons (The Rope) keep reading everything from lessons.js, untouched. */
+function fetchGatedContent(){
+  fetch(CONTENT_WEBHOOK, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, lesson_id: id })
+  }).then(function(res){
+    if (res.status === 402){ lockGate(); return null; }   // no access → upsell
+    if (!res.ok){ errorGate(); return null; }
+    return res.json();
+  }).then(function(data){
+    if (!data) return;                                     // 402 / error already shown
+    if (data.ok === false || data.locked){ lockGate(); return; }
+    // Merge the endpoint's content onto the local nav shell (index, prev/next, track…).
+    if (data.title)    lesson.title    = data.title;
+    if (data.subtitle) lesson.subtitle = data.subtitle;
+    lesson.cards        = data.cards || [];
+    lesson.artifactHtml = data.artifact_html || null;      // full HTML doc → iframe srcdoc
+    lesson.video        = data.video_embed_url || null;    // Bunny embed URL → iframe src
+    lesson.interaction  = data.interaction || null;        // e.g. { selector:'#nextBtn', event:'click' }
+    render();
+  }).catch(function(){ errorGate(); });
+}
+
 if (!lesson){
   gate('<div class="lock">🔍</div><h2>Lesson not found</h2><p>This lesson isn\'t available yet.</p>');
-} else if ((TIER_RANK[plan] ?? 0) < (TIER_RANK[lesson.tier] ?? 0)){
-  gate('<div class="lock">🔒</div><h2>'+esc(lesson.title)+'</h2>'+
-       '<p>This lesson is part of the '+cap(lesson.tier)+' plan. Upgrade to unlock the full '+
-       esc(lesson.trackLabel)+' track.</p>'+
-       '<a href="https://app.laserapp.ai">View plans</a>');
+} else if (lesson.tier === 'free'){
+  render();                       // free (The Rope) → fully local, untouched
+} else if (!email){
+  lockGate();                     // gated but no email → lock/upsell; do NOT call the endpoint
 } else {
-  render();
+  loadingGate();
+  fetchGatedContent();            // gated → endpoint verifies access and returns content
 }
 
 /* ======================= RENDER ======================= */
@@ -193,8 +241,9 @@ function render(){
   var pct = Math.round((lesson.index / lesson.trackTotal) * 100);
 
   var cardsHTML = (lesson.cards || []).map(function(c){
+    var hasFig = (c.fig !== false) && c.svg;   // no svg → text-only card
     return '<div class="card"><h3>'+c.title+'</h3>'+
-           (c.fig===false?'':'<div class="fig">'+(c.svg||'')+'</div>')+
+           (hasFig ? '<div class="fig">'+c.svg+'</div>' : '')+
            '<p>'+c.body+'</p></div>';
   }).join('');
 
@@ -211,15 +260,27 @@ function render(){
       '<div class="vlabel">VIDEO · COMING SOON</div></div>';
   }
 
-  var stageHTML = lesson.artifact
-    ? '<div class="stage-shell"><div class="stage-frame">'+
+  var stageHTML;
+  if (lesson.artifactHtml){
+    // Gated: full HTML document delivered inline → srcdoc. srcdoc iframes stay
+    // same-origin with the parent, so the interaction gate can still read their
+    // document on load (see wireUp). esc() makes the HTML a safe attribute value.
+    stageHTML = '<div class="stage-shell"><div class="stage-frame">'+
+        '<iframe id="artifactFrame" srcdoc="'+esc(lesson.artifactHtml)+'" title="'+esc(lesson.title)+' interactive"></iframe>'+
+      '</div></div>'+
+      '<div class="nudge" id="nudge">↑ Interact with the demo to continue</div>';
+  } else if (lesson.artifact){
+    // Free/local: artifact is a same-origin file path → src.
+    stageHTML = '<div class="stage-shell"><div class="stage-frame">'+
         '<iframe id="artifactFrame" src="'+esc(lesson.artifact)+'" title="'+esc(lesson.title)+' interactive"></iframe>'+
       '</div></div>'+
-      '<div class="nudge" id="nudge">↑ Move the slider to continue</div>'
-    : (lesson.download
-        ? '<div class="stage-shell" style="padding:22px;text-align:center">'+
-            '<a href="'+esc(lesson.download)+'" download style="color:var(--amber);font-weight:700;text-decoration:none">⬇ Download deck</a></div>'
-        : '');
+      '<div class="nudge" id="nudge">↑ Move the slider to continue</div>';
+  } else if (lesson.download){
+    stageHTML = '<div class="stage-shell" style="padding:22px;text-align:center">'+
+        '<a href="'+esc(lesson.download)+'" download style="color:var(--amber);font-weight:700;text-decoration:none">⬇ Download deck</a></div>';
+  } else {
+    stageHTML = '';
+  }
 
   // nav
   var prevHTML = lesson.prev
@@ -263,7 +324,7 @@ function wireUp(){
   btn.addEventListener('click', onComplete);
 
   // No artifact, or no interaction gate → allow completing right away.
-  if (!lesson.artifact || !lesson.interaction){ unlock(); return; }
+  if (!(lesson.artifact || lesson.artifactHtml) || !lesson.interaction){ unlock(); return; }
 
   var frame = document.getElementById('artifactFrame');
   frame.addEventListener('load', function(){
