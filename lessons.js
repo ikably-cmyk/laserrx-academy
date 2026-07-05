@@ -259,6 +259,23 @@ window.LESSONS = {
     artifact: null, download: 'library/Laser_Energy_Dynamics.pptx',
     interaction: null, video: null,
     prev: null, next: null, cards: []
+  },
+
+  /* ===================================================================
+     ALP — Blindaje B nav shell. tier !== 'free' → cards / artifact_html /
+     video come from the n8n endpoint after server-side access check.
+     No artifact path, no cards here: zero sensitive content in the repo.
+     =================================================================== */
+  alp_bone_mineralization: {
+    id: 'alp_bone_mineralization',
+    track: 'library',
+    trackLabel: 'Library',
+    index: 1,
+    trackTotal: 1,
+    tier: 'elite',
+    prev: null,
+    next: null,
+    cards: []
   }
 
 };
