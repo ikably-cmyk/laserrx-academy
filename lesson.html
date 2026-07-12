@@ -178,16 +178,107 @@ var completed  = false;
 function gate(html){ document.getElementById('root').innerHTML = '<div class="gate">'+html+'</div>'; }
 
 function lockGate(){
-  // Academy is a STANDALONE product with its own monthly subscription (academy_access),
-  // independent from the consult plan/credits. The lock copy must NOT mention Elite/Pro/
-  // any consult plan. CTA is a placeholder for now — the Academy Stripe checkout is wired
-  // in a later phase (no purchase link yet). This file has no i18n; copy is EN only.
-  gate('<div class="lock">🔒</div>'+
-       '<h2>This is a LaserRx Academy lesson</h2>'+
-       '<p>Academy is a separate learning module with its own monthly subscription — '+
-       'independent from your LaserRx plan and credits. Subscribe to unlock every Academy lesson.</p>'+
-       '<a aria-disabled="true" style="cursor:default;opacity:.55">Get Academy access</a>');
-       // TODO(next phase): point CTA at the Academy Stripe checkout once the product exists.
+  // Academy is a STANDALONE product with its own subscription (academy_access),
+  // independent from the consult plan/credits. Copy must NOT mention Elite/Pro.
+  // This file has no i18n; copy is EN only.
+
+  // The 4 live Academy Payment Links (Stripe), keyed by currency|interval.
+  var LINKS = {
+    'mxn|month': 'https://buy.stripe.com/5kQ8wH6l92QGaUa2MLdIA12',
+    'mxn|year' : 'https://buy.stripe.com/6oU6ozdNBdvke6m5YXdIA14',
+    'usd|month': 'https://buy.stripe.com/fZu7sD4d162Sd2i5YXdIA11',
+    'usd|year' : 'https://buy.stripe.com/7sY3cndNBbnc6DUafddIA13'
+  };
+  var PRICE = {
+    'mxn|month': '$199 MXN / month',
+    'mxn|year' : '$1,499 MXN / year',
+    'usd|month': '$14.99 USD / month',
+    'usd|year' : '$99 USD / year'
+  };
+  var SAVE = { 'mxn': 'Save ~37% billed yearly', 'usd': 'Save ~45% billed yearly' };
+
+  var cur  = 'mxn';   // default currency
+  var intv = 'month'; // default billing interval
+
+  var segBtn = 'display:inline-block;padding:8px 18px;border:1px solid #778DA9;' +
+               'background:transparent;color:#1B263B;' +
+               "font:500 14px/1 'Instrument Sans',sans-serif;" +
+               'cursor:pointer;border-radius:8px;margin:0 4px;';
+
+  gate(
+    '<div class="lock">🔒</div>' +
+    '<h2>This is a LaserRx Academy lesson</h2>' +
+    '<p>Academy is a separate learning module with its own subscription — ' +
+    'independent from your LaserRx plan and credits. Subscribe to unlock every Academy lesson.</p>' +
+
+    '<div style="margin:18px 0 6px;' +
+    "font:600 12px/1 'Space Mono',monospace;" +
+    'letter-spacing:.5px;color:#778DA9;text-transform:uppercase;">Currency</div>' +
+    '<div style="margin-bottom:14px;">' +
+      '<button id="btnMxn" type="button" style="' + segBtn + '">MXN</button>' +
+      '<button id="btnUsd" type="button" style="' + segBtn + '">USD</button>' +
+    '</div>' +
+
+    '<div style="margin:6px 0;' +
+    "font:600 12px/1 'Space Mono',monospace;" +
+    'letter-spacing:.5px;color:#778DA9;text-transform:uppercase;">Billing</div>' +
+    '<div style="margin-bottom:16px;">' +
+      '<button id="btnMonth" type="button" style="' + segBtn + '">Monthly</button>' +
+      '<button id="btnYear" type="button" style="' + segBtn + '">Annual</button>' +
+    '</div>' +
+
+    '<div id="acadPrice" style="' +
+    "font:700 22px/1.2 'Instrument Sans',sans-serif;" +
+    'color:#1B263B;margin-bottom:2px;">—</div>' +
+    '<div id="acadSave" style="' +
+    "font:600 12px/1 'Space Mono',monospace;" +
+    'color:#C67E36;margin-bottom:16px;display:none;">—</div>' +
+
+    '<a id="acadCta" target="_blank" rel="noopener" ' +
+      'style="display:inline-block;padding:13px 30px;background:#C67E36;color:#fff;' +
+      "font:600 15px/1 'Instrument Sans',sans-serif;" +
+      'text-decoration:none;border-radius:10px;' +
+      'box-shadow:0 2px 8px rgba(198,126,54,.35);">Get Academy access</a>' +
+
+    (email ? '' :
+      '<p style="margin-top:14px;' +
+      "font:400 12px/1.4 'Space Mono',monospace;" +
+      'color:#778DA9;">Tip: use the same email you registered with in LaserRx ' +
+      'so your access unlocks automatically.</p>')
+  );
+
+  function setActive(el, active){
+    if(!el) return;
+    el.style.background  = active ? '#1B263B' : 'transparent';
+    el.style.color       = active ? '#FFFFFF' : '#1B263B';
+    el.style.borderColor = active ? '#1B263B' : '#778DA9';
+    el.style.fontWeight  = active ? '600' : '500';
+  }
+
+  function paint(){
+    var key = cur + '|' + intv;
+    setActive(document.getElementById('btnMxn'),   cur === 'mxn');
+    setActive(document.getElementById('btnUsd'),   cur === 'usd');
+    setActive(document.getElementById('btnMonth'), intv === 'month');
+    setActive(document.getElementById('btnYear'),  intv === 'year');
+
+    document.getElementById('acadPrice').textContent = PRICE[key];
+
+    var saveEl = document.getElementById('acadSave');
+    if (intv === 'year'){ saveEl.textContent = SAVE[cur]; saveEl.style.display = 'block'; }
+    else { saveEl.style.display = 'none'; }
+
+    var href = LINKS[key];
+    if (email){ href += '?prefilled_email=' + encodeURIComponent(email); }
+    document.getElementById('acadCta').setAttribute('href', href);
+  }
+
+  document.getElementById('btnMxn').onclick   = function(){ cur = 'mxn';   paint(); };
+  document.getElementById('btnUsd').onclick   = function(){ cur = 'usd';   paint(); };
+  document.getElementById('btnMonth').onclick = function(){ intv = 'month'; paint(); };
+  document.getElementById('btnYear').onclick  = function(){ intv = 'year';  paint(); };
+
+  paint();
 }
 function loadingGate(){
   gate('<div class="lock">⏳</div><h2>Loading…</h2><p>Checking your access and preparing this lesson.</p>');
