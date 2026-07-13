@@ -108,6 +108,19 @@
   .stage-frame{position:relative;width:100%;aspect-ratio:16/10;border-radius:11px;overflow:hidden;background:#0D1B2A;}
   @media(max-width:560px){.stage-frame{aspect-ratio:3/4;}}
   .stage-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+  .fs-btn{
+    position:absolute;top:10px;right:10px;z-index:5;
+    width:38px;height:38px;border-radius:9px;cursor:pointer;
+    border:1px solid var(--hair-d);background:rgba(13,27,42,.72);color:var(--platinum);
+    font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;
+    backdrop-filter:blur(4px);transition:all .18s;
+  }
+  .fs-btn:hover{background:var(--navy);color:#fff;border-color:var(--steel);}
+  /* fullscreen is requested on .stage-frame (not the iframe) so the button stays visible/clickable */
+  .stage-frame:fullscreen{width:100vw;height:100vh;aspect-ratio:auto;border-radius:0;}
+  .stage-frame:fullscreen iframe{position:absolute;inset:0;width:100%;height:100%;}
+  .stage-frame:-webkit-full-screen{width:100vw;height:100vh;}
+  .stage-frame:-webkit-full-screen iframe{width:100%;height:100%;}
   .nudge{
     text-align:center;font-family:'Space Mono',monospace;font-size:11px;color:var(--amber);
     padding:10px 0 2px;letter-spacing:0.04em;transition:opacity .4s;
@@ -359,12 +372,14 @@ function render(){
     // same-origin with the parent, so the interaction gate can still read their
     // document on load (see wireUp). esc() makes the HTML a safe attribute value.
     stageHTML = '<div class="stage-shell"><div class="stage-frame">'+
+        '<button type="button" class="fs-btn" id="fsBtn" aria-label="Fullscreen" title="Fullscreen">⛶</button>'+
         '<iframe id="artifactFrame" srcdoc="'+esc(lesson.artifactHtml)+'" title="'+esc(lesson.title)+' interactive"></iframe>'+
       '</div></div>'+
       '<div class="nudge" id="nudge">↑ Interact with the demo to continue</div>';
   } else if (lesson.artifact){
     // Free/local: artifact is a same-origin file path → src.
     stageHTML = '<div class="stage-shell"><div class="stage-frame">'+
+        '<button type="button" class="fs-btn" id="fsBtn" aria-label="Fullscreen" title="Fullscreen">⛶</button>'+
         '<iframe id="artifactFrame" src="'+esc(lesson.artifact)+'" title="'+esc(lesson.title)+' interactive"></iframe>'+
       '</div></div>'+
       '<div class="nudge" id="nudge">↑ Move the slider to continue</div>';
@@ -415,6 +430,33 @@ function render(){
 function wireUp(){
   var btn = document.getElementById('completeBtn');
   btn.addEventListener('click', onComplete);
+
+  // Fullscreen toggle for the interactive artifact (tables are built for full width).
+  // Requested on the .stage-frame container, not the iframe, so the button stays
+  // visible/clickable and there are no cross-frame permission issues. Wired before the
+  // early return below so it works even for artifacts without an interaction gate.
+  var fsBtn = document.getElementById('fsBtn');
+  var frameWrap = document.querySelector('.stage-frame');
+  if (fsBtn && frameWrap){
+    if (!(frameWrap.requestFullscreen || frameWrap.webkitRequestFullscreen)){
+      fsBtn.style.display = 'none';                       // no native fullscreen (e.g. iOS Safari) → hide
+    } else {
+      fsBtn.addEventListener('click', function(){
+        if (!document.fullscreenElement && !document.webkitFullscreenElement){
+          (frameWrap.requestFullscreen || frameWrap.webkitRequestFullscreen).call(frameWrap);
+        } else {
+          (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+        }
+      });
+      function onFsChange(){
+        var on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+        fsBtn.textContent = on ? '✕' : '⛶';
+        fsBtn.title = on ? 'Exit fullscreen' : 'Fullscreen';
+      }
+      document.addEventListener('fullscreenchange', onFsChange);
+      document.addEventListener('webkitfullscreenchange', onFsChange);
+    }
+  }
 
   // No artifact, or no interaction gate → allow completing right away.
   if (!(lesson.artifact || lesson.artifactHtml) || !lesson.interaction){ unlock(); return; }
