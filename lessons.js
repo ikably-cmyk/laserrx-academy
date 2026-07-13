@@ -276,6 +276,30 @@ window.LESSONS = {
     prev: null,
     next: null,
     cards: []
+  },
+
+  /* ===================================================================
+     Selectivity vs. Energy Density — Blindaje B shell. tier:'paid' →
+     cards / artifact / videos[] are served by the n8n endpoint after the
+     academy_access check (402 gate). Nothing sensitive in this public file.
+     index / trackTotal / prev / next are PROVISIONAL — set in the batched
+     foundations ordering pass.
+     =================================================================== */
+  laser_selectivity: {
+    id: 'laser_selectivity',
+    track: 'foundations',
+    trackLabel: 'Foundations',
+    index: 7,
+    trackTotal: 7,
+    tier: 'paid',
+    title: 'Selectivity vs. Energy Density',
+    subtitle: 'Color selectivity persists — but enough energy density still crosses the damage threshold',
+    artifact: null,
+    cards: [],
+    videos: [],
+    interaction: { selector: '#sTime', event: 'input' },
+    prev: null,
+    next: null
   }
 
 };
