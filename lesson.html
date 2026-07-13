@@ -310,7 +310,8 @@ function fetchGatedContent(){
     if (data.subtitle) lesson.subtitle = data.subtitle;
     lesson.cards        = data.cards || [];
     lesson.artifactHtml = data.artifact_html || null;      // full HTML doc → iframe srcdoc
-    lesson.video        = data.video_embed_url || null;    // Bunny embed URL → iframe src
+    lesson.video        = data.video_embed_url || null;    // Bunny embed URL → iframe src (legacy single)
+    lesson.videos       = data.videos || null;             // multi-video: array of {url,label,poster} → normalizeVideos renders all
     lesson.interaction  = data.interaction || null;        // e.g. { selector:'#nextBtn', event:'click' }
     render();
   }).catch(function(){ errorGate(); });
