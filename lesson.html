@@ -338,16 +338,17 @@ function render(){
            '<p>'+c.body+'</p></div>';
   }).join('');
 
+  // Videos: supports lesson.videos[] (array of {url,label,poster}) with a
+  // backward-compatible fallback to the legacy single lesson.video string.
+  var vids = normalizeVideos(lesson);
   var videoHTML;
-  if (lesson.video){
-    if (/\.(mp4|webm|mov)(\?|$)/i.test(lesson.video)){
-      videoHTML = '<div class="video-box"><video src="'+esc(lesson.video)+'" controls preload="metadata" playsinline'+(lesson.poster?(' poster="'+esc(lesson.poster)+'"'):'')+'></video></div>';
-    } else {
-      videoHTML = '<div class="video-box"><iframe src="'+esc(lesson.video)+
-        '" allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>';
-    }
+  if (vids.length){
+    videoHTML = vids.map(function(v){
+      return '<div class="eyebrow">'+esc(v.label)+'</div>'+videoBox(v);
+    }).join('');
   } else {
-    videoHTML = '<div class="video-box"><div class="play"></div>'+
+    videoHTML = '<div class="eyebrow">Watch</div>'+
+      '<div class="video-box"><div class="play"></div>'+
       '<div class="vlabel">VIDEO · COMING SOON</div></div>';
   }
 
@@ -396,7 +397,7 @@ function render(){
     '</div></header>'+
     '<main class="wrap">'+
       (cardsHTML ? '<div class="eyebrow">What you\'ll learn</div><div class="cards">'+cardsHTML+'</div>' : '')+
-      '<div class="eyebrow">Watch</div>'+videoHTML+
+      videoHTML+
       (stageHTML ? '<div class="eyebrow">Try it</div>'+stageHTML : '')+
       '<div class="actions">'+
         '<button class="complete-btn" id="completeBtn">Mark as complete</button>'+
@@ -499,6 +500,27 @@ function track(event, secs){
 }
 
 /* ======================= HELPERS ======================= */
+// Returns a clean array of {url,label,poster}. Accepts the new lesson.videos[]
+// array or the legacy single lesson.video string. Empty array → placeholder.
+function normalizeVideos(l){
+  if (Array.isArray(l.videos) && l.videos.length){
+    return l.videos
+      .filter(function(v){ return v && v.url; })
+      .map(function(v){ return { url:v.url, label:v.label || 'Watch', poster:v.poster }; });
+  }
+  if (l.video){
+    return [{ url:l.video, label:'Watch', poster:l.poster }];
+  }
+  return [];
+}
+function videoBox(v){
+  if (/\.(mp4|webm|mov)(\?|$)/i.test(v.url)){
+    return '<div class="video-box"><video src="'+esc(v.url)+'" controls preload="metadata" playsinline'+
+           (v.poster?(' poster="'+esc(v.poster)+'"'):'')+'></video></div>';
+  }
+  return '<div class="video-box"><iframe src="'+esc(v.url)+
+    '" allow="accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>';
+}
 function navUrl(targetId){
   var u = new URLSearchParams();
   u.set('lesson', targetId);
