@@ -272,7 +272,7 @@ window.LESSONS = {
     trackLabel: 'Library',
     index: 1,
     trackTotal: 1,
-    tier: 'elite',
+    tier: 'paid',
     prev: null,
     next: null,
     cards: []
