@@ -176,6 +176,12 @@ var TRACK_WEBHOOK   = 'https://laserai.app.n8n.cloud/webhook/laserrx-academy-pro
 var CONTENT_WEBHOOK = 'https://laserai.app.n8n.cloud/webhook/laserrx-academy-content';
 var LESSON_VERSION = 'v1';
 
+// Single source of order (same-origin catalog.json). prev/next/index/trackTotal/trackLabel
+// are derived from position within a track; falls back to lessons.js when it can't load.
+var CATALOG_URL = 'catalog.json';   // root-relative when served under /laserrx-academy/
+var TRACK_LABEL = { foundations:'Foundations', clinical:'Clinical Tracks', library:'Library' };
+var CATALOG = null;
+
 /* ======================= PARAMS ======================= */
 var qs    = new URLSearchParams(location.search);
 var id    = qs.get('lesson') || 'the_rope';
@@ -330,16 +336,53 @@ function fetchGatedContent(){
   }).catch(function(){ errorGate(); });
 }
 
-if (!lesson){
-  gate('<div class="lock">🔍</div><h2>Lesson not found</h2><p>This lesson isn\'t available yet.</p>');
-} else if (lesson.tier === 'free'){
-  render();                       // free (The Rope) → fully local, untouched
-} else if (!email){
-  lockGate();                     // gated but no email → lock/upsell; do NOT call the endpoint
-} else {
-  loadingGate();
-  fetchGatedContent();            // gated → endpoint verifies access and returns content
+/* ---- Catalog-derived navigation. catalog.json is the single source of order;
+   we override prev/next/index/trackTotal/trackLabel from the lesson's position in
+   its track. If it can't load, we keep the lessons.js values (fallback). ---- */
+function loadCatalog(cb){
+  var done = false;
+  function go(c){ if(done) return; done = true; CATALOG = c; cb(); }
+  try{
+    fetch(CATALOG_URL, { cache:'no-cache' })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(c){ go(c && c.tracks && c.meta ? c : null); })
+      .catch(function(){ go(null); });
+  }catch(e){ go(null); }
+  setTimeout(function(){ go(null); }, 4000);   // hung fetch → fall back, never block boot
 }
+function applyCatalogNav(){
+  if (!lesson || !CATALOG) return;             // fallback: keep lessons.js prev/next/index/trackTotal
+  var tracks = CATALOG.tracks;
+  for (var tk in tracks){
+    if (!tracks.hasOwnProperty(tk)) continue;
+    var arr = tracks[tk] || [];
+    var i = arr.indexOf(lesson.id);
+    if (i >= 0){
+      lesson.prev       = i > 0 ? arr[i-1] : null;
+      lesson.next       = i < arr.length-1 ? arr[i+1] : null;
+      lesson.index      = i + 1;
+      lesson.trackTotal = arr.length;
+      lesson.trackLabel = TRACK_LABEL[tk] || lesson.trackLabel;
+      return;
+    }
+  }
+  // id not listed in the catalog → keep lessons.js values (fallback)
+}
+
+function boot(){
+  applyCatalogNav();                // catalog defines order; no-op if catalog absent
+  if (!lesson){
+    gate('<div class="lock">🔍</div><h2>Lesson not found</h2><p>This lesson isn\'t available yet.</p>');
+  } else if (lesson.tier === 'free'){
+    render();                       // free (The Rope) → fully local, untouched
+  } else if (!email){
+    lockGate();                     // gated but no email → lock/upsell; do NOT call the endpoint
+  } else {
+    loadingGate();
+    fetchGatedContent();            // gated → endpoint verifies access and returns content
+  }
+}
+loadCatalog(boot);                  // fetch catalog.json, then boot (falls back to lessons.js nav)
 
 /* ======================= RENDER ======================= */
 function render(){
