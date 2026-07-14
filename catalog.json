@@ -1,6 +1,6 @@
 {
   "tracks": {
-    "foundations": ["the_rope"],
+    "foundations": ["the_rope", "laser_selectivity"],
     "clinical": [],
     "library": ["alp_bone_mineralization"]
   },
@@ -9,6 +9,11 @@
       "tier": "free",
       "title": "The Rope",
       "sub": "Pulse width & peak power — same energy, different bend"
+    },
+    "laser_selectivity": {
+      "tier": "paid",
+      "title": "Selectivity vs. Energy Density",
+      "sub": "Color selectivity persists — but enough energy density still crosses the damage threshold"
     },
     "alp_bone_mineralization": {
       "tier": "paid",
