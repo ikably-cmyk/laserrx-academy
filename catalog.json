@@ -1,0 +1,19 @@
+{
+  "tracks": {
+    "foundations": ["the_rope"],
+    "clinical": [],
+    "library": ["alp_bone_mineralization"]
+  },
+  "meta": {
+    "the_rope": {
+      "tier": "free",
+      "title": "The Rope",
+      "sub": "Pulse width & peak power — same energy, different bend"
+    },
+    "alp_bone_mineralization": {
+      "tier": "paid",
+      "title": "Alkaline Phosphatase",
+      "sub": "How ALP turns a collagen scaffold into mineralized bone"
+    }
+  }
+}
