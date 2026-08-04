@@ -86,6 +86,20 @@
   .svg-w{font-family:'Space Mono',monospace;font-size:9px;font-weight:700;fill:var(--steel);}
   .svg-us{font-family:'Space Mono',monospace;font-size:10px;fill:var(--steel);}
 
+  /* ---------- transcript ---------- */
+  .transcript{display:flex;flex-direction:column;gap:8px;}
+  .tx-item{background:var(--card);border:1px solid var(--hair-d);border-radius:12px;overflow:hidden;}
+  .tx-item summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;
+    padding:13px 15px;font-size:14px;font-weight:600;color:var(--navy);}
+  .tx-item summary::-webkit-details-marker{display:none;}
+  .tx-item summary::after{content:'+';margin-left:auto;color:var(--steel);
+    font-family:'Space Mono',monospace;font-size:16px;line-height:1;}
+  .tx-item[open] summary::after{content:'\2013';}
+  .tx-num{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:var(--amber);min-width:20px;}
+  .tx-title{flex:1;}
+  .tx-body{padding:2px 15px 14px;border-top:1px solid var(--hair-d);}
+  .tx-body p{font-size:14px;color:#34404f;margin-top:11px;}
+
   /* ---------- video ---------- */
   .video-box{
     position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;
@@ -332,6 +346,8 @@ function fetchGatedContent(){
     lesson.video        = data.video_embed_url || null;    // Bunny embed URL → iframe src (legacy single)
     lesson.videos       = data.videos || null;             // multi-video: array of {url,label,poster} → normalizeVideos renders all
     lesson.interaction  = data.interaction || null;        // e.g. { selector:'#nextBtn', event:'click' }
+    lesson.transcriptEnabled = data.transcript_enabled === true;  // Academy standard: opt-in per lesson
+    lesson.transcript        = data.transcript || null;           // [{ video, title, text }]
     render();
   }).catch(function(){ errorGate(); });
 }
@@ -458,6 +474,7 @@ function render(){
       (cardsHTML ? '<div class="eyebrow">What you\'ll learn</div><div class="cards">'+cardsHTML+'</div>' : '')+
       videoHTML+
       (stageHTML ? '<div class="eyebrow">Try it</div>'+stageHTML : '')+
+      renderTranscript()+
       '<div class="actions">'+
         '<button class="complete-btn" id="completeBtn">Mark as complete</button>'+
         '<div class="nav">'+prevHTML+nextHTML+'</div>'+
@@ -501,8 +518,10 @@ function wireUp(){
     }
   }
 
-  // No artifact, or no interaction gate → allow completing right away.
-  if (!(lesson.artifact || lesson.artifactHtml) || !lesson.interaction){ unlock(); return; }
+  // No artifact at all → nothing to interact with, allow completing right away.
+  if (!(lesson.artifact || lesson.artifactHtml)){ unlock(); return; }
+  // Artifact present but the endpoint returned no interaction gate → dwell timer (not instant unlock).
+  if (!lesson.interaction){ dwellFallback(); return; }
 
   var frame = document.getElementById('artifactFrame');
   frame.addEventListener('load', function(){
@@ -615,6 +634,25 @@ function navUrl(targetId){
   return 'lesson.html?' + u.toString();
 }
 function lessonTitle(tid){ var l=(window.LESSONS||{})[tid]; return l?esc(l.title):'—'; }
+// Academy-wide transcript block. Renders only when the endpoint returned
+// transcript_enabled:true and a transcript array; otherwise nothing. One
+// collapsed <details> per {video,title,text} entry.
+function renderTranscript(){
+  if (!lesson.transcriptEnabled || !Array.isArray(lesson.transcript) || !lesson.transcript.length) return '';
+  var items = lesson.transcript.map(function(t){
+    var num = (t.video != null && t.video !== '') ? '<span class="tx-num">'+esc(String(t.video))+'</span>' : '';
+    return '<details class="tx-item"><summary>'+num+'<span class="tx-title">'+esc(t.title||'')+'</span></summary>'+
+           '<div class="tx-body">'+txParas(t.text)+'</div></details>';
+  }).join('');
+  return '<div class="eyebrow">Transcript</div><div class="transcript">'+items+'</div>';
+}
+function txParas(t){
+  if (!t) return '';
+  return String(t).split(/\n{2,}/).map(function(p){
+    p = esc(p.replace(/\s*\n\s*/g,' ').trim());
+    return p ? '<p>'+p+'</p>' : '';
+  }).join('');
+}
 function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 function cap(s){ return String(s).charAt(0).toUpperCase()+String(s).slice(1); }
 </script>

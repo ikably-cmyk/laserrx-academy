@@ -300,6 +300,25 @@ window.LESSONS = {
     interaction: { selector: '#sTime', event: 'input' },
     prev: null,
     next: null
+  },
+
+  /* ===================================================================
+     The Parameter Console — Blindaje B shell. tier:'paid' → cards /
+     artifact / videos[] / interaction / transcript served by the n8n
+     endpoint after the academy_access check. index / trackTotal / prev /
+     next are PROVISIONAL until the foundations ordering pass (catalog.json).
+     =================================================================== */
+  laser_parameter_console: {
+    id: 'laser_parameter_console',
+    track: 'foundations', trackLabel: 'Foundations',
+    index: 2, trackTotal: 7, tier: 'paid',
+    title: 'The Parameter Console',
+    subtitle: 'What you set, what follows, and why the numbers move together',
+    artifact: null,
+    interaction: null,
+    video: null, videos: [],
+    prev: null, next: null,
+    cards: []
   }
 
 };
