@@ -1,6 +1,6 @@
 {
   "tracks": {
-    "foundations": ["the_rope", "laser_selectivity"],
+    "foundations": ["the_rope", "laser_parameter_console", "laser_selectivity"],
     "clinical": [],
     "library": ["alp_bone_mineralization"]
   },
@@ -9,6 +9,11 @@
       "tier": "free",
       "title": "The Rope",
       "sub": "Pulse width & peak power — same energy, different bend"
+    },
+    "laser_parameter_console": {
+      "tier": "paid",
+      "title": "The Parameter Console",
+      "sub": "What you set, what follows, and why the numbers move together"
     },
     "laser_selectivity": {
       "tier": "paid",
