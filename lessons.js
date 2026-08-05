@@ -323,6 +323,25 @@ window.LESSONS = {
     video: null, videos: [],
     prev: null, next: null,
     cards: []
+  },
+
+  /* ===================================================================
+     Wavelength — Blindaje B shell. tier:'paid' → cards / artifact /
+     videos[] / interaction / transcript served by the n8n endpoint after
+     the academy_access check. index / trackTotal / prev / next are
+     PROVISIONAL until the foundations ordering pass (catalog.json).
+     =================================================================== */
+  laser_wavelength: {
+    id: 'laser_wavelength',
+    track: 'foundations', trackLabel: 'Foundations',
+    index: 6, trackTotal: 6, tier: 'paid',
+    title: 'Wavelength',
+    subtitle: 'The one parameter you can&#39;t change, and everything it decides',
+    artifact: null,
+    interaction: null,
+    video: null, videos: [],
+    prev: null, next: null,
+    cards: []
   }
 
 };
