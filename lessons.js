@@ -181,12 +181,16 @@ window.LESSONS = {
      FOUNDATIONS — remaining stubs (cards/artifact filled in later phases)
      =================================================================== */
   hertz_bouncing_ball: {
-    id: 'hertz_bouncing_ball', track: 'foundations', trackLabel: 'Foundations',
-    index: 2, trackTotal: 6, tier: 'pro',
-    title: 'Hertz', subtitle: 'Frequency, made visible',
-    artifact: 'artifacts/hertz_bouncing_ball.html',
-    interaction: null, video: null,
-    prev: 'the_rope', next: 'laser_energy_live_demo', cards: []
+    id: 'hertz_bouncing_ball',
+    track: 'foundations', trackLabel: 'Foundations',
+    index: 3, trackTotal: 8, tier: 'paid',
+    title: 'Hertz',
+    subtitle: 'Pulses per second, and what happens to each one',
+    artifact: null,
+    interaction: null,
+    video: null, videos: [],
+    prev: null, next: null,
+    cards: []
   },
   laser_energy_live_demo: {
     id: 'laser_energy_live_demo', track: 'foundations', trackLabel: 'Foundations',
