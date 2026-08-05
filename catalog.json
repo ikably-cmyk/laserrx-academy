@@ -1,6 +1,6 @@
 {
   "tracks": {
-    "foundations": ["the_rope", "laser_parameter_console", "hertz_bouncing_ball", "laser_selectivity"],
+    "foundations": ["the_rope", "laser_wavelength", "laser_parameter_console", "hertz_bouncing_ball", "laser_selectivity"],
     "clinical": [],
     "library": ["alp_bone_mineralization"]
   },
@@ -9,6 +9,11 @@
       "tier": "free",
       "title": "The Rope",
       "sub": "Pulse width & peak power — same energy, different bend"
+    },
+    "laser_wavelength": {
+      "tier": "paid",
+      "title": "Wavelength",
+      "sub": "The one parameter you can't change, and everything it decides"
     },
     "laser_parameter_console": {
       "tier": "paid",
