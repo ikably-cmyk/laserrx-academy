@@ -1,6 +1,6 @@
 {
   "tracks": {
-    "foundations": ["the_rope", "laser_parameter_console", "laser_selectivity"],
+    "foundations": ["the_rope", "laser_parameter_console", "hertz_bouncing_ball", "laser_selectivity"],
     "clinical": [],
     "library": ["alp_bone_mineralization"]
   },
@@ -14,6 +14,11 @@
       "tier": "paid",
       "title": "The Parameter Console",
       "sub": "What you set, what follows, and why the numbers move together"
+    },
+    "hertz_bouncing_ball": {
+      "tier": "paid",
+      "title": "Hertz",
+      "sub": "Pulses per second, and what happens to each one"
     },
     "laser_selectivity": {
       "tier": "paid",
