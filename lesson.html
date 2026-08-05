@@ -203,6 +203,24 @@ var email = (qs.get('email') || '').trim();
 var plan  = (qs.get('plan')  || 'free').trim().toLowerCase();
 var lesson = (window.LESSONS || {})[id];
 
+/* Identity. After the Glide Row-ID migration the chat enters with #k=<rowid>
+   and no ?email=. The Row ID travels in the hash so it never lands in the query
+   string; email is the legacy path (Glide's Academy tab still sends ?email=)
+   and stays until that entry point is retired. The endpoint accepts both and
+   prefers k. */
+var hs = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+var K  = (hs.get('k') || '').trim();
+var HAS_IDENT = !!(K || email);
+
+/* Back to the chat, carrying whatever identity we came in with. Same shape as
+   the chat's own openAcademyLesson: legacy ?email= when present, Row ID in the
+   hash. Single definition so the two back links can't drift apart. */
+function chatUrl(){
+  return 'https://ikably-cmyk.github.io/laserrx-chat/' +
+         (email ? ('?email=' + encodeURIComponent(email)) : '') +
+         (K ? ('#k=' + encodeURIComponent(K)) : '');
+}
+
 var startTime = Date.now();
 var interacted = false;
 var completed  = false;
@@ -317,7 +335,7 @@ function loadingGate(){
   gate('<div class="lock">⏳</div><h2>Loading…</h2><p>Checking your access and preparing this lesson.</p>');
 }
 function errorGate(){
-  var back = 'https://ikably-cmyk.github.io/laserrx-chat/' + (email ? ('?email=' + encodeURIComponent(email)) : '');
+  var back = chatUrl();
   gate('<div class="lock">⚠️</div><h2>Couldn\'t load this lesson</h2>'+
        '<p>Something went wrong reaching the server. Please refresh to try again.</p>'+
        '<a href="'+esc(back)+'">← Back to LaserRx</a>');
@@ -330,7 +348,7 @@ function fetchGatedContent(){
   fetch(CONTENT_WEBHOOK, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email, lesson_id: id })
+    body: JSON.stringify({ k: K, email: email, lesson_id: id })
   }).then(function(res){
     if (res.status === 402){ lockGate(); return null; }   // no access → upsell
     if (!res.ok){ errorGate(); return null; }
@@ -391,8 +409,8 @@ function boot(){
     gate('<div class="lock">🔍</div><h2>Lesson not found</h2><p>This lesson isn\'t available yet.</p>');
   } else if (lesson.tier === 'free'){
     render();                       // free (The Rope) → fully local, untouched
-  } else if (!email){
-    lockGate();                     // gated but no email → lock/upsell; do NOT call the endpoint
+  } else if (!HAS_IDENT){
+    lockGate();                     // gated but no identity (no k, no email) → lock/upsell; do NOT call the endpoint
   } else {
     loadingGate();
     fetchGatedContent();            // gated → endpoint verifies access and returns content
@@ -457,7 +475,7 @@ function render(){
     ? '<a class="next" id="nextLink" href="'+navUrl(lesson.next)+'"><span class="dir">Next →</span>'+lessonTitle(lesson.next)+'</a>'
     : '<a class="next disabled"><span class="dir">Next →</span>End of track</a>';
 
-  var backUrl = 'https://ikably-cmyk.github.io/laserrx-chat/' + (email ? ('?email=' + encodeURIComponent(email)) : '');
+  var backUrl = chatUrl();
 
   document.getElementById('root').innerHTML =
     '<header><div class="wrap">'+
@@ -631,7 +649,9 @@ function navUrl(targetId){
   u.set('lesson', targetId);
   if (email) u.set('email', email);
   if (plan)  u.set('plan', plan);
-  return 'lesson.html?' + u.toString();
+  // Carry the Row ID across prev/next. Without this the hash is dropped on the
+  // second lesson and identity is lost mid-track.
+  return 'lesson.html?' + u.toString() + (K ? '#k=' + encodeURIComponent(K) : '');
 }
 function lessonTitle(tid){ var l=(window.LESSONS||{})[tid]; return l?esc(l.title):'—'; }
 // Academy-wide transcript block. Renders only when the endpoint returned
