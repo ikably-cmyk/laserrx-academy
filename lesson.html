@@ -595,8 +595,15 @@ function onComplete(){
 
 /* ======================= TRACKING (non-blocking) ======================= */
 function track(event, secs){
-  if (!email) return; // anonymous / public preview → no tracking
+  /* Identity, not email. The endpoint resolves the Row ID to a correo and a
+     progress_key server-side, so entering with #k= and no ?email= is a fully
+     tracked visit. Only the genuinely anonymous one — ni k ni email — is the
+     public preview that must not write progress. Misma condicion que usa boot
+     para decidir el candado: si una deja pasar y la otra no, hay una leccion
+     que se ve y no se registra. */
+  if (!HAS_IDENT) return; // anonymous / public preview → no tracking
   var payload = {
+    k: K,
     email: email,
     lesson_id: lesson.id,
     track: lesson.track,
