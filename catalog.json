@@ -1,6 +1,6 @@
 {
   "tracks": {
-    "foundations": ["the_rope", "laser_wavelength", "laser_parameter_console", "hertz_bouncing_ball", "laser_selectivity"],
+    "foundations": ["the_rope", "laser_wavelength", "laser_parameter_console", "hertz_bouncing_ball", "peak_power_live", "laser_selectivity"],
     "clinical": [],
     "library": ["alp_bone_mineralization"]
   },
@@ -24,6 +24,11 @@
       "tier": "paid",
       "title": "Hertz",
       "sub": "Pulses per second, and what happens to each one"
+    },
+    "peak_power_live": {
+      "tier": "paid",
+      "title": "Peak Power",
+      "sub": "What the machine spends vs. what the tissue feels"
     },
     "laser_selectivity": {
       "tier": "paid",
