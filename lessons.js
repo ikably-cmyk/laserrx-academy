@@ -209,12 +209,16 @@ window.LESSONS = {
     prev: 'laser_energy_live_demo', next: 'peak_power_live', cards: []
   },
   peak_power_live: {
-    id: 'peak_power_live', track: 'foundations', trackLabel: 'Foundations',
-    index: 5, trackTotal: 6, tier: 'pro',
-    title: 'Peak Power — Live', subtitle: 'Four bidirectional sliders',
-    artifact: 'artifacts/peak_power_live.html',
-    interaction: null, video: null,
-    prev: 'slower_is_faster', next: 'laser_performance_panel', cards: []
+    id: 'peak_power_live',
+    track: 'foundations', trackLabel: 'Foundations',
+    index: 5, trackTotal: 7, tier: 'paid',
+    title: 'Peak Power',
+    subtitle: 'What the machine spends vs. what the tissue feels',
+    artifact: null,
+    interaction: null,
+    video: null, videos: [],
+    prev: null, next: null,
+    cards: []
   },
   laser_performance_panel: {
     id: 'laser_performance_panel', track: 'foundations', trackLabel: 'Foundations',
