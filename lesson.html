@@ -331,6 +331,29 @@ function lockGate(){
 
   paint();
 }
+/* Identity gate — shown when we could not resolve WHO the user is (no k / no
+   email, or a k that matches no row). This is NOT a payment problem, so it must
+   never show Stripe: sending an already-paying user to checkout is exactly the
+   confusion the ambiguous 402 caused. No payment links, no prices, no upsell. */
+function identityGate(){
+  var back = chatUrl();
+  gate('<div class="lock">\uD83D\uDD17</div>' +
+       '<h2>We couldn\'t identify you</h2>' +
+       '<p>This link doesn\'t carry a valid session, so we can\'t check your Academy access. ' +
+       'Open the lesson from inside the LaserRx app and it will unlock automatically.</p>' +
+       '<p style="margin-top:10px;font:400 12px/1.4 \'Space Mono\',monospace;color:#778DA9;">' +
+       'If you reached this page from a saved or copied link, that link has no session attached.</p>' +
+       '<a href="' + esc(back) + '">\u2190 Open LaserRx</a>');
+}
+
+/* Route a locked response by its reason. The endpoint (node 04) emits
+   reason ∈ NO_IDENTITY | IDENTITY_NOT_FOUND | NO_ACCESS.
+   Unknown / missing / unparseable reason → lockGate(), i.e. today's behaviour.
+   The fallback is always the stricter screen, never the looser one. */
+function lockedGateFor(reason){
+  if (reason === 'IDENTITY_NOT_FOUND' || reason === 'NO_IDENTITY'){ identityGate(); }
+  else { lockGate(); }
+}
 function loadingGate(){
   gate('<div class="lock">⏳</div><h2>Loading…</h2><p>Checking your access and preparing this lesson.</p>');
 }
@@ -350,12 +373,17 @@ function fetchGatedContent(){
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ k: K, email: email, lesson_id: id })
   }).then(function(res){
-    if (res.status === 402){ lockGate(); return null; }   // no access → upsell
+    if (res.status === 402){                               // locked → identity or payment
+      return res.json().then(function(b){
+        lockedGateFor(b && b.reason);
+        return null;
+      }).catch(function(){ lockGate(); return null; });   // unreadable body → today's screen
+    }
     if (!res.ok){ errorGate(); return null; }
     return res.json();
   }).then(function(data){
     if (!data) return;                                     // 402 / error already shown
-    if (data.ok === false || data.locked){ lockGate(); return; }
+    if (data.ok === false || data.locked){ lockedGateFor(data.reason); return; }
     // Merge the endpoint's content onto the local nav shell (index, prev/next, track…).
     if (data.title)    lesson.title    = data.title;
     if (data.subtitle) lesson.subtitle = data.subtitle;
@@ -410,7 +438,7 @@ function boot(){
   } else if (lesson.tier === 'free'){
     render();                       // free (The Rope) → fully local, untouched
   } else if (!HAS_IDENT){
-    lockGate();                     // gated but no identity (no k, no email) → lock/upsell; do NOT call the endpoint
+    identityGate();                 // gated but no identity (no k, no email) → identity screen; do NOT call the endpoint
   } else {
     loadingGate();
     fetchGatedContent();            // gated → endpoint verifies access and returns content
