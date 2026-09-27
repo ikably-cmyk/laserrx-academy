@@ -1,6 +1,6 @@
 {
   "tracks": {
-    "foundations": ["the_rope", "laser_wavelength", "laser_parameter_console", "hertz_bouncing_ball", "peak_power_live", "laser_selectivity"],
+    "foundations": ["the_rope", "laser_wavelength", "laser_parameter_console", "hertz_bouncing_ball", "peak_power_live", "laser_selectivity", "photon_energy"],
     "clinical": [],
     "library": ["alp_bone_mineralization"]
   },
@@ -39,6 +39,11 @@
       "tier": "paid",
       "title": "Alkaline Phosphatase",
       "sub": "How ALP turns a collagen scaffold into mineralized bone"
+    },
+    "photon_energy": {
+      "tier": "paid",
+      "title": "Photons & Walls",
+      "sub": "Why Wi-Fi passes, light stops — and what that means for tissue"
     }
   }
 }
