@@ -346,6 +346,19 @@ window.LESSONS = {
     video: null, videos: [],
     prev: null, next: null,
     cards: []
+  },
+
+  photon_energy: {
+    id: 'photon_energy',
+    track: 'foundations', trackLabel: 'Foundations',
+    index: 7, trackTotal: 7, tier: 'paid',
+    title: 'Photons & Walls',
+    subtitle: 'Why Wi-Fi passes, light stops — and what that means for tissue',
+    artifact: null,
+    interaction: null,
+    video: null, videos: [],
+    prev: null, next: null,
+    cards: []
   }
 
 };
