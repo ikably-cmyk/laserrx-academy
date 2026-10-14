@@ -359,6 +359,22 @@ window.LESSONS = {
     video: null, videos: [],
     prev: null, next: null,
     cards: []
+  },
+
+  /* ===================================================================
+     CLINICAL · 1 — ENDO DECISION ASSISTANT (gated; content served by endpoint)
+     =================================================================== */
+  endo_decision_assistant: {
+    id: 'endo_decision_assistant',
+    track: 'clinical', trackLabel: 'Clinical Tracks',
+    index: 1, trackTotal: 1, tier: 'paid',
+    title: 'Endo: Which Laser, When, and How',
+    subtitle: 'From 72 hours before to home — one case, four moments',
+    artifact: null,
+    interaction: null,
+    video: null, videos: [],
+    prev: null, next: null,
+    cards: []
   }
 
 };
